@@ -1,0 +1,26 @@
+[
+   {
+      "Marks":90,
+      "Grade":"A"
+   },
+   {
+      "Marks":80,
+      "Grade":"B"
+   },
+   {
+      "Marks":70,
+      "Grade":"C"
+   },
+   {
+      "Marks":60,
+      "Grade":"D"
+   },
+   {
+      "Marks":50,
+      "Grade":"E"
+   },
+   {
+      "Marks":40,
+      "Grade":"F"
+   }
+]

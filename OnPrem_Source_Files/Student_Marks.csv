@@ -1,0 +1,207 @@
+﻿Student_Id,Subject,Marks
+1,Mathematics,88
+1,Science,91
+1,English,85
+2,Mathematics,76
+2,History,81
+3,Science,89
+3,English,74
+3,Computer Science,95
+4,Mathematics,67
+4,Geography,72
+5,English,90
+5,Science,84
+5,Physics,79
+6,Chemistry,88
+6,Mathematics,92
+7,Biology,70
+7,English,75
+8,Mathematics,83
+8,Physics,80
+8,Chemistry,78
+9,Science,91
+9,Computer Science,94
+10,English,87
+10,History,82
+11,Mathematics,69
+11,Physics,73
+12,Chemistry,86
+12,Biology,89
+13,Computer Science,97
+13,Mathematics,90
+14,Geography,71
+14,English,76
+15,Physics,85
+15,Chemistry,88
+15,Mathematics,82
+16,Biology,91
+16,English,84
+17,Mathematics,79
+17,Science,81
+18,Computer Science,96
+18,Physics,88
+19,Chemistry,75
+19,History,72
+20,Mathematics,89
+20,English,92
+21,Science,85
+21,Geography,77
+22,Biology,80
+22,Chemistry,84
+23,Mathematics,91
+23,Physics,87
+23,Computer Science,93
+24,English,73
+24,History,69
+25,Science,88
+25,Chemistry,82
+26,Biology,78
+26,Geography,74
+27,Mathematics,95
+27,English,89
+28,Physics,83
+28,Chemistry,81
+29,Computer Science,90
+29,Science,86
+30,Mathematics,77
+30,English,80
+31,History,71
+31,Geography,75
+32,Biology,92
+32,Chemistry,88
+33,Physics,84
+33,Mathematics,87
+34,English,79
+34,Science,82
+35,Computer Science,94
+35,Mathematics,91
+36,Biology,85
+36,Chemistry,83
+37,Geography,70
+37,History,74
+38,Science,89
+38,Physics,90
+39,Mathematics,86
+39,English,88
+40,Computer Science,92
+40,Chemistry,87
+41,Biology,76
+41,Geography,73
+42,Mathematics,93
+42,Science,91
+43,English,84
+43,History,78
+44,Physics,80
+44,Chemistry,82
+45,Biology,88
+45,Mathematics,85
+46,Science,90
+46,Computer Science,95
+47,English,77
+47,Geography,72
+48,Mathematics,81
+48,Physics,83
+49,Chemistry,86
+49,Biology,89
+50,Computer Science,97
+50,Mathematics,94
+51,English,75
+51,History,70
+52,Science,88
+52,Physics,85
+53,Chemistry,91
+53,Biology,87
+54,Mathematics,79
+54,English,82
+55,Computer Science,93
+55,Science,89
+56,Geography,74
+56,History,77
+57,Physics,84
+57,Chemistry,86
+58,Biology,90
+58,Mathematics,88
+59,English,81
+59,Science,85
+60,Computer Science,96
+60,Physics,92
+61,Chemistry,78
+61,Geography,73
+62,Mathematics,87
+62,Biology,84
+63,English,76
+63,History,71
+64,Science,90
+64,Chemistry,88
+65,Physics,85
+65,Mathematics,89
+66,Computer Science,94
+66,English,86
+67,Biology,79
+67,Geography,75
+68,Chemistry,83
+68,Science,87
+69,Mathematics,91
+69,Physics,88
+70,English,80
+70,History,76
+71,Biology,92
+71,Computer Science,95
+72,Science,84
+72,Chemistry,82
+73,Mathematics,77
+73,Geography,72
+74,Physics,89
+74,English,85
+75,Computer Science,98
+75,Mathematics,93
+76,Biology,81
+76,Chemistry,86
+77,Science,88
+77,Physics,84
+78,English,79
+78,History,74
+79,Mathematics,90
+79,Computer Science,92
+80,Biology,87
+80,Geography,78
+81,Chemistry,85
+81,Science,89
+82,Physics,83
+82,Mathematics,86
+83,English,80
+83,History,75
+84,Computer Science,94
+84,Science,91
+85,Biology,77
+85,Chemistry,81
+86,Mathematics,88
+86,Physics,90
+87,English,82
+87,Geography,76
+88,Science,85
+88,Computer Science,93
+89,Chemistry,79
+89,Biology,84
+90,Mathematics,91
+90,English,87
+91,Physics,86
+91,Science,89
+92,Computer Science,95
+92,Chemistry,88
+93,Biology,90
+93,Mathematics,92
+94,English,78
+94,Geography,74
+95,Science,83
+95,Physics,85
+96,Computer Science,97
+96,Mathematics,94
+97,Biology,76
+97,Chemistry,80
+98,English,81
+98,History,77
+99,Science,89
+99,Physics,87
+100,Computer Science,96
+100,Mathematics,93
