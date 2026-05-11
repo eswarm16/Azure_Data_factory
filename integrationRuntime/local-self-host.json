@@ -1,0 +1,6 @@
+{
+	"name": "local-self-host",
+	"properties": {
+		"type": "SelfHosted"
+	}
+}
