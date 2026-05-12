@@ -14,6 +14,9 @@
 		"ls_datalake_properties_typeProperties_url": {
 			"value": "https://adfprojectaccount.dfs.core.windows.net/"
 		},
+		"ls_github_properties_typeProperties_url": {
+			"value": "https://raw.githubusercontent.com/"
+		},
 		"ls_onprem_file_properties_typeProperties_host": {
 			"value": "C:\\source"
 		},

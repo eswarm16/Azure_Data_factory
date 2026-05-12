@@ -19,6 +19,10 @@
 			"type": "string",
 			"defaultValue": "https://adfprojectaccount.dfs.core.windows.net/"
 		},
+		"ls_github_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://raw.githubusercontent.com/"
+		},
 		"ls_onprem_file_properties_typeProperties_host": {
 			"type": "string",
 			"defaultValue": "C:\\source"
@@ -62,6 +66,9 @@
 					},
 					"ls_datalake_properties_typeProperties_url": {
 						"value": "[parameters('ls_datalake_properties_typeProperties_url')]"
+					},
+					"ls_github_properties_typeProperties_url": {
+						"value": "[parameters('ls_github_properties_typeProperties_url')]"
 					},
 					"ls_onprem_file_properties_typeProperties_host": {
 						"value": "[parameters('ls_onprem_file_properties_typeProperties_host')]"
