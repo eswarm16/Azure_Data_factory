@@ -1,0 +1,18 @@
+{
+	"name": "ds_api_scr",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_github",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "HttpServerLocation",
+				"relativeUrl": "eswarm16/Azure_Data_factory/refs/heads/main/Source%20Files/API_SourceFiles/Students_Grade_table.json"
+			}
+		},
+		"schema": {}
+	}
+}
