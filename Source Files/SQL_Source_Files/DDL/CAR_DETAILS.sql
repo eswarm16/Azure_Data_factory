@@ -10,7 +10,7 @@ CREATE TABLE [dbo].[Car_Details]
     Fuel_Type VARCHAR(50),
     Transmission VARCHAR(50),
     Engine_CC INT,
-    Price DECIMAL(6,2)
+    Price DECIMAL(7,2)
 );
 
 
