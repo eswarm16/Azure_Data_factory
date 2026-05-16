@@ -1,0 +1,20 @@
+{
+	"name": "ds_lastload_json",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_datalake",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "lastload",
+				"folderPath": "sqlmonitor/lastload",
+				"fileSystem": "bronze"
+			}
+		},
+		"schema": {}
+	}
+}
