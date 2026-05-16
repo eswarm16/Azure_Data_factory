@@ -5,11 +5,23 @@
 		"factoryName": {
 			"value": "adfprojectaccount"
 		},
+		"ls_AzureSql_password": {
+			"value": ""
+		},
 		"ls_datalake_accountKey": {
 			"value": ""
 		},
 		"ls_onprem_file_password": {
 			"value": ""
+		},
+		"ls_AzureSql_properties_typeProperties_server": {
+			"value": "adfprojectservers.database.windows.net"
+		},
+		"ls_AzureSql_properties_typeProperties_database": {
+			"value": "adfproject"
+		},
+		"ls_AzureSql_properties_typeProperties_userName": {
+			"value": "adminuser"
 		},
 		"ls_datalake_properties_typeProperties_url": {
 			"value": "https://adfprojectaccount.dfs.core.windows.net/"
