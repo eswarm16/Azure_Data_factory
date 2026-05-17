@@ -143,11 +143,104 @@
 									}
 								}
 							]
+						},
+						{
+							"name": "CurrentTime",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Copy_SQL_Data",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "Current_time",
+								"value": {
+									"value": "@formatDateTime(utcNow(),'yyyy-MM-dd HH:mm:ss.fff')",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Update_LastLoad",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "CurrentTime",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "JsonSource",
+									"additionalColumns": [
+										{
+											"name": "lastload",
+											"value": {
+												"value": "@variables('Current_time')",
+												"type": "Expression"
+											}
+										}
+									],
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "JsonReadSettings"
+									}
+								},
+								"sink": {
+									"type": "JsonSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "JsonWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "ds_empty_json",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "ds_lastload_json",
+									"type": "DatasetReference"
+								}
+							]
 						}
 					]
 				}
 			}
 		],
+		"variables": {
+			"Current_time": {
+				"type": "String"
+			}
+		},
 		"annotations": []
 	}
 }
