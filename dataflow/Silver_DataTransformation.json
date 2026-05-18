@@ -94,10 +94,10 @@
 					"name": "castPrice"
 				},
 				{
-					"name": "derivedVin"
+					"name": "derivedUpperCases"
 				},
 				{
-					"name": "derivedVinCar"
+					"name": "derivedColumnUpper"
 				},
 				{
 					"name": "alterRow1"
@@ -113,6 +113,12 @@
 				},
 				{
 					"name": "alterRow5"
+				},
+				{
+					"name": "derivedUpper"
+				},
+				{
+					"name": "select"
 				}
 			],
 			"scriptLines": [
@@ -178,18 +184,44 @@
 				"          Last_Name = upper(Last_Name)) ~> derivedUpperCase",
 				"derivedUpperCase derive(Full_Name = concat(First_Name,\" \",Last_Name)) ~> derivedFullname",
 				"studentmarks sort(desc(Marks, false)) ~> sortMarks",
-				"studentgrades derive(Grade = replace(Grade,'F','Fail')) ~> derivedGrade",
+				"studentgrades derive(Grade = replace(Grade,'F','FAIL')) ~> derivedGrade",
 				"cardetails cast(output(",
 				"          Price as integer",
 				"     ),",
 				"     errors: true) ~> castPrice",
-				"castPrice derive(VIN = upper(VIN)) ~> derivedVin",
-				"carsalesdetails derive(VIN = upper(VIN)) ~> derivedVinCar",
+				"castPrice derive(VIN = upper(VIN),",
+				"          Make = upper(Make),",
+				"          Model = upper(Model),",
+				"          Variant = upper(Variant),",
+				"          Body = upper(Body),",
+				"          Color = upper(Color),",
+				"          Fuel_Type = upper(Fuel_Type),",
+				"          Transmission = upper(Transmission)) ~> derivedUpperCases",
+				"carsalesdetails derive(VIN = upper(VIN),",
+				"          Buyer_Name = upper(Buyer_Name),",
+				"          Buyer_Gender = upper(Buyer_Gender),",
+				"          Buyer_City = upper(Buyer_City),",
+				"          Buyer_State = upper(Buyer_State),",
+				"          Loan_Taken = upper(Loan_Taken)) ~> derivedColumnUpper",
 				"derivedFullname alterRow(upsertIf(1==1)) ~> alterRow1",
-				"sortMarks alterRow(upsertIf(1==1)) ~> alterRow2",
+				"derivedUpper alterRow(upsertIf(1==1)) ~> alterRow2",
 				"derivedGrade alterRow(upsertIf(1==1)) ~> alterRow3",
-				"derivedVin alterRow(upsertIf(1==1)) ~> alterRow4",
-				"derivedVinCar alterRow(upsertIf(1==1)) ~> alterRow5",
+				"derivedUpperCases alterRow(upsertIf(1==1)) ~> alterRow4",
+				"select alterRow(upsertIf(1==1)) ~> alterRow5",
+				"sortMarks derive(Subject = upper(Subject)) ~> derivedUpper",
+				"derivedColumnUpper select(mapColumn(",
+				"          VIN,",
+				"          Name = Buyer_Name,",
+				"          Gender = Buyer_Gender,",
+				"          Age = Buyer_Age,",
+				"          City = Buyer_City,",
+				"          State = Buyer_State,",
+				"          Loan = Loan_Taken,",
+				"          Sell_Date,",
+				"          Updated_at",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
