@@ -1,0 +1,230 @@
+{
+	"name": "Gold_DataServing",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "ls_datalake",
+						"type": "LinkedServiceReference"
+					},
+					"name": "CarDetails"
+				},
+				{
+					"linkedService": {
+						"referenceName": "ls_datalake",
+						"type": "LinkedServiceReference"
+					},
+					"name": "CarSalesDetails"
+				},
+				{
+					"linkedService": {
+						"referenceName": "ls_datalake",
+						"type": "LinkedServiceReference"
+					},
+					"name": "StudentNames"
+				},
+				{
+					"linkedService": {
+						"referenceName": "ls_datalake",
+						"type": "LinkedServiceReference"
+					},
+					"name": "StudentMarks"
+				},
+				{
+					"linkedService": {
+						"referenceName": "ls_datalake",
+						"type": "LinkedServiceReference"
+					},
+					"name": "GradeTable"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "ls_datalake",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "Innerjoin"
+				},
+				{
+					"name": "select"
+				},
+				{
+					"name": "Leftjoin"
+				},
+				{
+					"name": "selectGradeTable"
+				},
+				{
+					"name": "join1"
+				},
+				{
+					"name": "window1"
+				},
+				{
+					"name": "filter1"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "alterRow1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          VIN as string,",
+				"          Make as string,",
+				"          Model as string,",
+				"          Year as integer,",
+				"          Variant as string,",
+				"          Body as string,",
+				"          Color as string,",
+				"          Fuel_Type as string,",
+				"          Transmission as string,",
+				"          Engine_CC as integer,",
+				"          Price as integer,",
+				"          Updated_at as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'silver',",
+				"     folderPath: 'car_details') ~> CarDetails",
+				"source(output(",
+				"          VIN as string,",
+				"          Name as string,",
+				"          Gender as string,",
+				"          Age as integer,",
+				"          City as string,",
+				"          State as string,",
+				"          Loan as string,",
+				"          Sell_Date as date,",
+				"          Updated_at as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'silver',",
+				"     folderPath: 'car_sales_details') ~> CarSalesDetails",
+				"source(output(",
+				"          Id as short,",
+				"          First_Name as string,",
+				"          Last_Name as string,",
+				"          Full_Name as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'silver',",
+				"     folderPath: 'student_names') ~> StudentNames",
+				"source(output(",
+				"          Student_Id as short,",
+				"          Subject as string,",
+				"          Marks as short",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'silver',",
+				"     folderPath: 'student_marks') ~> StudentMarks",
+				"source(output(",
+				"          Grade as string,",
+				"          Marks as short",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'silver',",
+				"     folderPath: 'grades_table') ~> GradeTable",
+				"CarDetails, CarSalesDetails join(CarDetails@VIN == CarSalesDetails@VIN,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> Innerjoin",
+				"Innerjoin select(mapColumn(",
+				"          VIN = CarDetails@VIN,",
+				"          Make,",
+				"          Model,",
+				"          Year,",
+				"          Body,",
+				"          Color,",
+				"          Fuel_Type,",
+				"          Transmission,",
+				"          Name,",
+				"          Gender,",
+				"          Age,",
+				"          City,",
+				"          State,",
+				"          Loan,",
+				"          Price,",
+				"          Sell_Date",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select",
+				"StudentNames, StudentMarks join(Id == Student_Id,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> Leftjoin",
+				"GradeTable select(mapColumn(",
+				"          Grade,",
+				"          Marks_Limit = Marks",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> selectGradeTable",
+				"Leftjoin, selectGradeTable join(Marks>=Marks_Limit,",
+				"     joinType:'cross',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"join1 window(over(Id,",
+				"          Subject),",
+				"     desc(Marks, false),",
+				"     rn = rowNumber()) ~> window1",
+				"window1 filter(rn == 1) ~> filter1",
+				"filter1 select(mapColumn(",
+				"          Id,",
+				"          Name = Full_Name,",
+				"          Subject,",
+				"          Marks,",
+				"          Grade",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 alterRow(upsertIf(1==1)) ~> alterRow1",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'gold',",
+				"     folderPath: 'student_grades',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['Id'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
+			]
+		}
+	}
+}
