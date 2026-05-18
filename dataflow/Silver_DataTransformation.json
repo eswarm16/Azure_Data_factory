@@ -1,0 +1,291 @@
+{
+	"name": "Silver_DataTransformation",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_student_names",
+						"type": "DatasetReference"
+					},
+					"name": "studentnames"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_student_marks",
+						"type": "DatasetReference"
+					},
+					"name": "studentmarks"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_student_grades",
+						"type": "DatasetReference"
+					},
+					"name": "studentgrades"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_car_details",
+						"type": "DatasetReference"
+					},
+					"name": "cardetails"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_car_sales_details",
+						"type": "DatasetReference"
+					},
+					"name": "carsalesdetails"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "ls_datalake",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sinkstudentnames"
+				},
+				{
+					"linkedService": {
+						"referenceName": "ls_datalake",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sinkstudentmarks"
+				},
+				{
+					"linkedService": {
+						"referenceName": "ls_datalake",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sinkgrades"
+				},
+				{
+					"linkedService": {
+						"referenceName": "ls_datalake",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sinkcardetails"
+				},
+				{
+					"linkedService": {
+						"referenceName": "ls_datalake",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sinkcarsalesdetails"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedUpperCase"
+				},
+				{
+					"name": "derivedFullname"
+				},
+				{
+					"name": "sortMarks"
+				},
+				{
+					"name": "derivedGrade"
+				},
+				{
+					"name": "castPrice"
+				},
+				{
+					"name": "derivedVin"
+				},
+				{
+					"name": "derivedVinCar"
+				},
+				{
+					"name": "alterRow1"
+				},
+				{
+					"name": "alterRow2"
+				},
+				{
+					"name": "alterRow3"
+				},
+				{
+					"name": "alterRow4"
+				},
+				{
+					"name": "alterRow5"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          Id as short,",
+				"          First_Name as string,",
+				"          Last_Name as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> studentnames",
+				"source(output(",
+				"          Student_Id as short,",
+				"          Subject as string,",
+				"          Marks as short",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> studentmarks",
+				"source(output(",
+				"          Grade as string,",
+				"          Marks as short",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     documentForm: 'documentPerLine') ~> studentgrades",
+				"source(output(",
+				"          VIN as string,",
+				"          Make as string,",
+				"          Model as string,",
+				"          Year as integer,",
+				"          Variant as string,",
+				"          Body as string,",
+				"          Color as string,",
+				"          Fuel_Type as string,",
+				"          Transmission as string,",
+				"          Engine_CC as integer,",
+				"          Price as decimal(7,2),",
+				"          Updated_at as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> cardetails",
+				"source(output(",
+				"          VIN as string,",
+				"          Buyer_Name as string,",
+				"          Buyer_Gender as string,",
+				"          Buyer_Age as integer,",
+				"          Buyer_City as string,",
+				"          Buyer_State as string,",
+				"          Loan_Taken as string,",
+				"          Sell_Date as date,",
+				"          Dealer_Name as string,",
+				"          Updated_at as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> carsalesdetails",
+				"studentnames derive(First_Name = upper(First_Name),",
+				"          Last_Name = upper(Last_Name)) ~> derivedUpperCase",
+				"derivedUpperCase derive(Full_Name = concat(First_Name,\" \",Last_Name)) ~> derivedFullname",
+				"studentmarks sort(desc(Marks, false)) ~> sortMarks",
+				"studentgrades derive(Grade = replace(Grade,'F','Fail')) ~> derivedGrade",
+				"cardetails cast(output(",
+				"          Price as integer",
+				"     ),",
+				"     errors: true) ~> castPrice",
+				"castPrice derive(VIN = upper(VIN)) ~> derivedVin",
+				"carsalesdetails derive(VIN = upper(VIN)) ~> derivedVinCar",
+				"derivedFullname alterRow(upsertIf(1==1)) ~> alterRow1",
+				"sortMarks alterRow(upsertIf(1==1)) ~> alterRow2",
+				"derivedGrade alterRow(upsertIf(1==1)) ~> alterRow3",
+				"derivedVin alterRow(upsertIf(1==1)) ~> alterRow4",
+				"derivedVinCar alterRow(upsertIf(1==1)) ~> alterRow5",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'silver',",
+				"     folderPath: 'student_names',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['Id'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkstudentnames",
+				"alterRow2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'silver',",
+				"     folderPath: 'student_marks',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['Student_Id','Subject'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkstudentmarks",
+				"alterRow3 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'silver',",
+				"     folderPath: 'grades_table',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: true,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['Marks'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkgrades",
+				"alterRow4 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'silver',",
+				"     folderPath: 'car_details',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: true,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['VIN'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkcardetails",
+				"alterRow5 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'silver',",
+				"     folderPath: 'car_sales_details',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: true,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['VIN'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkcarsalesdetails"
+			]
+		}
+	}
+}
