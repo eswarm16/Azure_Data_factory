@@ -140,6 +140,58 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/ds_car_details')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_datalake",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "Car_Details.parquet",
+						"folderPath": "sql",
+						"fileSystem": "bronze"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_datalake')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_car_sales_details')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_datalake",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "Car_Sales_Details.parquet",
+						"folderPath": "sql",
+						"fileSystem": "bronze"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_datalake')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/ds_datalake')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -304,31 +356,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/ls_onprem_file')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "FileServer",
-				"typeProperties": {
-					"host": "[parameters('ls_onprem_file_properties_typeProperties_host')]",
-					"userId": "[parameters('ls_onprem_file_properties_typeProperties_userId')]",
-					"password": {
-						"type": "SecureString",
-						"value": "[parameters('ls_onprem_file_password')]"
-					}
-				},
-				"connectVia": {
-					"referenceName": "local-self-host",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/local-self-host')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ds_student_names')]",
+			"name": "[concat(parameters('factoryName'), '/ds_student_grades')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -337,20 +365,16 @@
 					"type": "LinkedServiceReference"
 				},
 				"annotations": [],
-				"type": "DelimitedText",
+				"type": "Json",
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": "Student_Names.csv",
-						"folderPath": "onprem",
+						"fileName": "Students_Grade_table.json",
+						"folderPath": "github",
 						"fileSystem": "bronze"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
+					}
 				},
-				"schema": []
+				"schema": {}
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/ls_datalake')]"
@@ -386,7 +410,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/ds_student_grades')]",
+			"name": "[concat(parameters('factoryName'), '/ds_student_names')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -395,68 +419,323 @@
 					"type": "LinkedServiceReference"
 				},
 				"annotations": [],
-				"type": "Json",
+				"type": "DelimitedText",
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": "Students_Grade_table.json",
-						"folderPath": "github",
+						"fileName": "Student_Names.csv",
+						"folderPath": "onprem",
 						"fileSystem": "bronze"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_datalake')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ls_onprem_file')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "FileServer",
+				"typeProperties": {
+					"host": "[parameters('ls_onprem_file_properties_typeProperties_host')]",
+					"userId": "[parameters('ls_onprem_file_properties_typeProperties_userId')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('ls_onprem_file_password')]"
 					}
 				},
-				"schema": {}
+				"connectVia": {
+					"referenceName": "local-self-host",
+					"type": "IntegrationRuntimeReference"
+				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ls_datalake')]"
+				"[concat(variables('factoryId'), '/integrationRuntimes/local-self-host')]"
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/ds_car_details')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
+			"name": "[concat(parameters('factoryName'), '/Gold_DataServing')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"linkedServiceName": {
-					"referenceName": "ls_datalake",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "Parquet",
+				"type": "MappingDataFlow",
 				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": "Car_Details.parquet",
-						"folderPath": "sql",
-						"fileSystem": "bronze"
-					},
-					"compressionCodec": "snappy"
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ls_datalake')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ds_car_sales_details')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "ls_datalake",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "Parquet",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": "Car_Sales_Details.parquet",
-						"folderPath": "sql",
-						"fileSystem": "bronze"
-					},
-					"compressionCodec": "snappy"
-				},
-				"schema": []
+					"sources": [
+						{
+							"linkedService": {
+								"referenceName": "ls_datalake",
+								"type": "LinkedServiceReference"
+							},
+							"name": "CarDetails"
+						},
+						{
+							"linkedService": {
+								"referenceName": "ls_datalake",
+								"type": "LinkedServiceReference"
+							},
+							"name": "CarSalesDetails"
+						},
+						{
+							"linkedService": {
+								"referenceName": "ls_datalake",
+								"type": "LinkedServiceReference"
+							},
+							"name": "StudentNames"
+						},
+						{
+							"linkedService": {
+								"referenceName": "ls_datalake",
+								"type": "LinkedServiceReference"
+							},
+							"name": "StudentMarks"
+						},
+						{
+							"linkedService": {
+								"referenceName": "ls_datalake",
+								"type": "LinkedServiceReference"
+							},
+							"name": "GradeTable"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "ls_datalake",
+								"type": "LinkedServiceReference"
+							},
+							"name": "sink1"
+						},
+						{
+							"linkedService": {
+								"referenceName": "ls_datalake",
+								"type": "LinkedServiceReference"
+							},
+							"name": "sink2"
+						}
+					],
+					"transformations": [
+						{
+							"name": "Innerjoin"
+						},
+						{
+							"name": "select"
+						},
+						{
+							"name": "Leftjoin"
+						},
+						{
+							"name": "selectGradeTable"
+						},
+						{
+							"name": "join1"
+						},
+						{
+							"name": "window1"
+						},
+						{
+							"name": "filter1"
+						},
+						{
+							"name": "select1"
+						},
+						{
+							"name": "alterRow1"
+						},
+						{
+							"name": "derivedSellDate"
+						},
+						{
+							"name": "aggregate1"
+						},
+						{
+							"name": "sort1"
+						},
+						{
+							"name": "alterRow2"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          VIN as string,",
+						"          Make as string,",
+						"          Model as string,",
+						"          Year as integer,",
+						"          Variant as string,",
+						"          Body as string,",
+						"          Color as string,",
+						"          Fuel_Type as string,",
+						"          Transmission as string,",
+						"          Engine_CC as integer,",
+						"          Price as integer,",
+						"          Updated_at as timestamp",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: true,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'silver',",
+						"     folderPath: 'car_details') ~> CarDetails",
+						"source(output(",
+						"          VIN as string,",
+						"          Name as string,",
+						"          Gender as string,",
+						"          Age as integer,",
+						"          City as string,",
+						"          State as string,",
+						"          Loan as string,",
+						"          Sell_Date as date,",
+						"          Updated_at as timestamp",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'silver',",
+						"     folderPath: 'car_sales_details') ~> CarSalesDetails",
+						"source(output(",
+						"          Id as short,",
+						"          First_Name as string,",
+						"          Last_Name as string,",
+						"          Full_Name as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'silver',",
+						"     folderPath: 'student_names') ~> StudentNames",
+						"source(output(",
+						"          Student_Id as short,",
+						"          Subject as string,",
+						"          Marks as short",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'silver',",
+						"     folderPath: 'student_marks') ~> StudentMarks",
+						"source(output(",
+						"          Grade as string,",
+						"          Marks as short",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'silver',",
+						"     folderPath: 'grades_table') ~> GradeTable",
+						"CarDetails, CarSalesDetails join(CarDetails@VIN == CarSalesDetails@VIN,",
+						"     joinType:'inner',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> Innerjoin",
+						"Innerjoin select(mapColumn(",
+						"          Make,",
+						"          Model,",
+						"          Transmission,",
+						"          State,",
+						"          Price,",
+						"          Sell_Date",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select",
+						"StudentNames, StudentMarks join(Id == Student_Id,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> Leftjoin",
+						"GradeTable select(mapColumn(",
+						"          Grade,",
+						"          Marks_Limit = Marks",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> selectGradeTable",
+						"Leftjoin, selectGradeTable join(Marks>=Marks_Limit,",
+						"     joinType:'cross',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> join1",
+						"join1 window(over(Id,",
+						"          Subject),",
+						"     desc(Marks, false),",
+						"     rn = rowNumber()) ~> window1",
+						"window1 filter(rn == 1) ~> filter1",
+						"filter1 select(mapColumn(",
+						"          Id,",
+						"          Name = Full_Name,",
+						"          Subject,",
+						"          Marks,",
+						"          Grade",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select1",
+						"select1 alterRow(upsertIf(1==1)) ~> alterRow1",
+						"select derive(Sell_Years = year(Sell_Date)) ~> derivedSellDate",
+						"derivedSellDate aggregate(groupBy(Make,",
+						"          Model,",
+						"          Transmission,",
+						"          State,",
+						"          Sell_Years),",
+						"     Quantity_Sold = count(1),",
+						"          Sales = sum(Price)) ~> aggregate1",
+						"aggregate1 sort(asc(Make, false),",
+						"     asc(Model, false),",
+						"     asc(Transmission, false),",
+						"     asc(State, false),",
+						"     desc(Sell_Years, false),",
+						"     desc(Quantity_Sold, false),",
+						"     desc(Sales, false)) ~> sort1",
+						"sort1 alterRow(upsertIf(1==1)) ~> alterRow2",
+						"alterRow1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'gold',",
+						"     folderPath: 'student_grades',",
+						"     mergeSchema: false,",
+						"     autoCompact: false,",
+						"     optimizedWrite: false,",
+						"     vacuum: 0,",
+						"     deletable: false,",
+						"     insertable: false,",
+						"     updateable: false,",
+						"     upsertable: true,",
+						"     keys:['Id'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sink1",
+						"alterRow2 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'gold',",
+						"     folderPath: 'car_sales',",
+						"     mergeSchema: false,",
+						"     autoCompact: false,",
+						"     optimizedWrite: false,",
+						"     vacuum: 0,",
+						"     deletable: false,",
+						"     insertable: false,",
+						"     updateable: false,",
+						"     upsertable: true,",
+						"     keys:['Make','Model','Transmission','State','Sell_Years'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sink2"
+					]
+				}
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/ls_datalake')]"
@@ -550,14 +829,14 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/SQL_to_Datalake')]",
+			"name": "[concat(parameters('factoryName'), '/Gold_Transformations')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "GetSQLTables",
-						"type": "Lookup",
+						"name": "Gold_DataFlow",
+						"type": "ExecuteDataFlow",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "0.12:00:00",
@@ -568,273 +847,39 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": "SELECT\n    t.TABLE_SCHEMA AS table_schema,\n    t.TABLE_NAME AS table_name,\n    c.COLUMN_NAME AS watermark_column\nFROM INFORMATION_SCHEMA.TABLES t\nJOIN INFORMATION_SCHEMA.COLUMNS c\nON t.TABLE_NAME = c.TABLE_NAME\nAND t.TABLE_SCHEMA = c.TABLE_SCHEMA\nWHERE t.TABLE_TYPE = 'BASE TABLE'\nAND c.COLUMN_NAME IN (\n    'Updated_at'\n)",
-								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "ds_sql_scr",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "ForEachTable",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "GetSQLTables",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('GetSQLTables').output.value",
-								"type": "Expression"
-							},
-							"activities": [
-								{
-									"name": "LastLoad",
-									"type": "Lookup",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "JsonSource",
-											"storeSettings": {
-												"type": "AzureBlobFSReadSettings",
-												"recursive": true,
-												"enablePartitionDiscovery": false
-											},
-											"formatSettings": {
-												"type": "JsonReadSettings"
-											}
-										},
-										"dataset": {
-											"referenceName": "ds_lastload_json",
-											"type": "DatasetReference",
-											"parameters": {}
-										},
-										"firstRowOnly": false
-									}
-								},
-								{
-									"name": "Copy_SQL_Data",
-									"type": "Copy",
-									"dependsOn": [
-										{
-											"activity": "LastLoad",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "AzureSqlSource",
-											"sqlReaderQuery": {
-												"value": "@concat(\n'SELECT * FROM [',\nitem().table_schema,\n'].[',\nitem().table_name,\n'] WHERE [',\nitem().watermark_column,\n'] > ''',\nactivity('LastLoad').output.value[0].lastload,\n''''\n)",
-												"type": "Expression"
-											},
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"sink": {
-											"type": "ParquetSink",
-											"storeSettings": {
-												"type": "AzureBlobFSWriteSettings"
-											},
-											"formatSettings": {
-												"type": "ParquetWriteSettings"
-											}
-										},
-										"enableStaging": false,
-										"translator": {
-											"type": "TabularTranslator",
-											"typeConversion": true,
-											"typeConversionSettings": {
-												"allowDataTruncation": true,
-												"treatBooleanAsNumber": false
-											}
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "ds_sql_scr",
-											"type": "DatasetReference",
-											"parameters": {}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "ds_datalake_bronze_sql_Parquet",
-											"type": "DatasetReference",
-											"parameters": {
-												"file_name": {
-													"value": "@concat(item().table_name,'.parquet')",
-													"type": "Expression"
-												}
-											}
-										}
-									]
-								},
-								{
-									"name": "CurrentTime",
-									"type": "SetVariable",
-									"dependsOn": [
-										{
-											"activity": "Copy_SQL_Data",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "Current_time",
-										"value": {
-											"value": "@formatDateTime(utcNow(),'yyyy-MM-dd HH:mm:ss.fff')",
-											"type": "Expression"
-										}
-									}
-								},
-								{
-									"name": "Update_LastLoad",
-									"type": "Copy",
-									"dependsOn": [
-										{
-											"activity": "CurrentTime",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "JsonSource",
-											"additionalColumns": [
-												{
-													"name": "lastload",
-													"value": {
-														"value": "@variables('Current_time')",
-														"type": "Expression"
-													}
-												}
-											],
-											"storeSettings": {
-												"type": "AzureBlobFSReadSettings",
-												"recursive": true,
-												"enablePartitionDiscovery": false
-											},
-											"formatSettings": {
-												"type": "JsonReadSettings"
-											}
-										},
-										"sink": {
-											"type": "JsonSink",
-											"storeSettings": {
-												"type": "AzureBlobFSWriteSettings"
-											},
-											"formatSettings": {
-												"type": "JsonWriteSettings"
-											}
-										},
-										"enableStaging": false
-									},
-									"inputs": [
-										{
-											"referenceName": "ds_empty_json",
-											"type": "DatasetReference",
-											"parameters": {}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "ds_lastload_json",
-											"type": "DatasetReference",
-											"parameters": {}
-										}
-									]
+							"dataflow": {
+								"referenceName": "Gold_DataServing",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"CarDetails": {},
+									"CarSalesDetails": {},
+									"StudentNames": {},
+									"StudentMarks": {},
+									"GradeTable": {},
+									"sink1": {},
+									"sink2": {}
 								}
-							]
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "None",
+							"cacheSinks": {
+								"firstRowOnly": true
+							}
 						}
 					}
 				],
 				"policy": {
 					"elapsedTimeMetric": {}
 				},
-				"variables": {
-					"Current_time": {
-						"type": "String"
-					}
-				},
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/ds_sql_scr')]",
-				"[concat(variables('factoryId'), '/datasets/ds_lastload_json')]",
-				"[concat(variables('factoryId'), '/datasets/ds_datalake_bronze_sql_Parquet')]",
-				"[concat(variables('factoryId'), '/datasets/ds_empty_json')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ds_onprem')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "ls_onprem_file",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "FileServerLocation"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ls_onprem_file')]"
+				"[concat(variables('factoryId'), '/dataflows/Gold_DataServing')]"
 			]
 		}
 	]

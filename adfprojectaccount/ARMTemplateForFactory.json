@@ -140,6 +140,60 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/Gold_Transformations')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Gold_DataFlow",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "Gold_DataServing",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"CarDetails": {},
+									"CarSalesDetails": {},
+									"StudentNames": {},
+									"StudentMarks": {},
+									"GradeTable": {},
+									"sink1": {},
+									"sink2": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "None",
+							"cacheSinks": {
+								"firstRowOnly": true
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/Gold_DataServing')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/SQL_to_Datalake')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -402,6 +456,63 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/Silver_Transformations')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "SilverDataFlow",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "Silver_DataTransformation",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"studentnames": {},
+									"studentmarks": {},
+									"studentgrades": {},
+									"cardetails": {},
+									"carsalesdetails": {},
+									"sinkstudentnames": {},
+									"sinkstudentmarks": {},
+									"sinkgrades": {},
+									"sinkcardetails": {},
+									"sinkcarsalesdetails": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "None",
+							"cacheSinks": {
+								"firstRowOnly": true
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/Silver_DataTransformation')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/onprem_ingestion')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -648,6 +759,58 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/ds_car_details')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_datalake",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "Car_Details.parquet",
+						"folderPath": "sql",
+						"fileSystem": "bronze"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_datalake')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_car_sales_details')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_datalake",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "Car_Sales_Details.parquet",
+						"folderPath": "sql",
+						"fileSystem": "bronze"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_datalake')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/ds_datalake')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -873,6 +1036,89 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/ds_student_grades')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_datalake",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "Students_Grade_table.json",
+						"folderPath": "github",
+						"fileSystem": "bronze"
+					}
+				},
+				"schema": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_datalake')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_student_marks')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_datalake",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "Student_Marks.csv",
+						"folderPath": "onprem",
+						"fileSystem": "bronze"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_datalake')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_student_names')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_datalake",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "Student_Names.csv",
+						"folderPath": "onprem",
+						"fileSystem": "bronze"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_datalake')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/ls_AzureSql')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -959,6 +1205,285 @@
 				"typeProperties": {}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Gold_DataServing')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"linkedService": {
+								"referenceName": "ls_datalake",
+								"type": "LinkedServiceReference"
+							},
+							"name": "CarDetails"
+						},
+						{
+							"linkedService": {
+								"referenceName": "ls_datalake",
+								"type": "LinkedServiceReference"
+							},
+							"name": "CarSalesDetails"
+						},
+						{
+							"linkedService": {
+								"referenceName": "ls_datalake",
+								"type": "LinkedServiceReference"
+							},
+							"name": "StudentNames"
+						},
+						{
+							"linkedService": {
+								"referenceName": "ls_datalake",
+								"type": "LinkedServiceReference"
+							},
+							"name": "StudentMarks"
+						},
+						{
+							"linkedService": {
+								"referenceName": "ls_datalake",
+								"type": "LinkedServiceReference"
+							},
+							"name": "GradeTable"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "ls_datalake",
+								"type": "LinkedServiceReference"
+							},
+							"name": "sink1"
+						},
+						{
+							"linkedService": {
+								"referenceName": "ls_datalake",
+								"type": "LinkedServiceReference"
+							},
+							"name": "sink2"
+						}
+					],
+					"transformations": [
+						{
+							"name": "Innerjoin"
+						},
+						{
+							"name": "select"
+						},
+						{
+							"name": "Leftjoin"
+						},
+						{
+							"name": "selectGradeTable"
+						},
+						{
+							"name": "join1"
+						},
+						{
+							"name": "window1"
+						},
+						{
+							"name": "filter1"
+						},
+						{
+							"name": "select1"
+						},
+						{
+							"name": "alterRow1"
+						},
+						{
+							"name": "derivedSellDate"
+						},
+						{
+							"name": "aggregate1"
+						},
+						{
+							"name": "sort1"
+						},
+						{
+							"name": "alterRow2"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          VIN as string,",
+						"          Make as string,",
+						"          Model as string,",
+						"          Year as integer,",
+						"          Variant as string,",
+						"          Body as string,",
+						"          Color as string,",
+						"          Fuel_Type as string,",
+						"          Transmission as string,",
+						"          Engine_CC as integer,",
+						"          Price as integer,",
+						"          Updated_at as timestamp",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: true,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'silver',",
+						"     folderPath: 'car_details') ~> CarDetails",
+						"source(output(",
+						"          VIN as string,",
+						"          Name as string,",
+						"          Gender as string,",
+						"          Age as integer,",
+						"          City as string,",
+						"          State as string,",
+						"          Loan as string,",
+						"          Sell_Date as date,",
+						"          Updated_at as timestamp",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'silver',",
+						"     folderPath: 'car_sales_details') ~> CarSalesDetails",
+						"source(output(",
+						"          Id as short,",
+						"          First_Name as string,",
+						"          Last_Name as string,",
+						"          Full_Name as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'silver',",
+						"     folderPath: 'student_names') ~> StudentNames",
+						"source(output(",
+						"          Student_Id as short,",
+						"          Subject as string,",
+						"          Marks as short",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'silver',",
+						"     folderPath: 'student_marks') ~> StudentMarks",
+						"source(output(",
+						"          Grade as string,",
+						"          Marks as short",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'silver',",
+						"     folderPath: 'grades_table') ~> GradeTable",
+						"CarDetails, CarSalesDetails join(CarDetails@VIN == CarSalesDetails@VIN,",
+						"     joinType:'inner',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> Innerjoin",
+						"Innerjoin select(mapColumn(",
+						"          Make,",
+						"          Model,",
+						"          Transmission,",
+						"          State,",
+						"          Price,",
+						"          Sell_Date",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select",
+						"StudentNames, StudentMarks join(Id == Student_Id,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> Leftjoin",
+						"GradeTable select(mapColumn(",
+						"          Grade,",
+						"          Marks_Limit = Marks",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> selectGradeTable",
+						"Leftjoin, selectGradeTable join(Marks>=Marks_Limit,",
+						"     joinType:'cross',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> join1",
+						"join1 window(over(Id,",
+						"          Subject),",
+						"     desc(Marks, false),",
+						"     rn = rowNumber()) ~> window1",
+						"window1 filter(rn == 1) ~> filter1",
+						"filter1 select(mapColumn(",
+						"          Id,",
+						"          Name = Full_Name,",
+						"          Subject,",
+						"          Marks,",
+						"          Grade",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select1",
+						"select1 alterRow(upsertIf(1==1)) ~> alterRow1",
+						"select derive(Sell_Years = year(Sell_Date)) ~> derivedSellDate",
+						"derivedSellDate aggregate(groupBy(Make,",
+						"          Model,",
+						"          Transmission,",
+						"          State,",
+						"          Sell_Years),",
+						"     Quantity_Sold = count(1),",
+						"          Sales = sum(Price)) ~> aggregate1",
+						"aggregate1 sort(asc(Make, false),",
+						"     asc(Model, false),",
+						"     asc(Transmission, false),",
+						"     asc(State, false),",
+						"     desc(Sell_Years, false),",
+						"     desc(Quantity_Sold, false),",
+						"     desc(Sales, false)) ~> sort1",
+						"sort1 alterRow(upsertIf(1==1)) ~> alterRow2",
+						"alterRow1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'gold',",
+						"     folderPath: 'student_grades',",
+						"     mergeSchema: false,",
+						"     autoCompact: false,",
+						"     optimizedWrite: false,",
+						"     vacuum: 0,",
+						"     deletable: false,",
+						"     insertable: false,",
+						"     updateable: false,",
+						"     upsertable: true,",
+						"     keys:['Id'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sink1",
+						"alterRow2 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'gold',",
+						"     folderPath: 'car_sales',",
+						"     mergeSchema: false,",
+						"     autoCompact: false,",
+						"     optimizedWrite: false,",
+						"     vacuum: 0,",
+						"     deletable: false,",
+						"     insertable: false,",
+						"     updateable: false,",
+						"     upsertable: true,",
+						"     keys:['Make','Model','Transmission','State','Sell_Years'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sink2"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_datalake')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/Silver_DataTransformation')]",
@@ -1058,10 +1583,10 @@
 							"name": "castPrice"
 						},
 						{
-							"name": "derivedVin"
+							"name": "derivedUpperCases"
 						},
 						{
-							"name": "derivedVinCar"
+							"name": "derivedColumnUpper"
 						},
 						{
 							"name": "alterRow1"
@@ -1077,6 +1602,12 @@
 						},
 						{
 							"name": "alterRow5"
+						},
+						{
+							"name": "derivedUpper"
+						},
+						{
+							"name": "select"
 						}
 					],
 					"scriptLines": [
@@ -1142,18 +1673,44 @@
 						"          Last_Name = upper(Last_Name)) ~> derivedUpperCase",
 						"derivedUpperCase derive(Full_Name = concat(First_Name,\" \",Last_Name)) ~> derivedFullname",
 						"studentmarks sort(desc(Marks, false)) ~> sortMarks",
-						"studentgrades derive(Grade = replace(Grade,'F','Fail')) ~> derivedGrade",
+						"studentgrades derive(Grade = replace(Grade,'F','FAIL')) ~> derivedGrade",
 						"cardetails cast(output(",
 						"          Price as integer",
 						"     ),",
 						"     errors: true) ~> castPrice",
-						"castPrice derive(VIN = upper(VIN)) ~> derivedVin",
-						"carsalesdetails derive(VIN = upper(VIN)) ~> derivedVinCar",
+						"castPrice derive(VIN = upper(VIN),",
+						"          Make = upper(Make),",
+						"          Model = upper(Model),",
+						"          Variant = upper(Variant),",
+						"          Body = upper(Body),",
+						"          Color = upper(Color),",
+						"          Fuel_Type = upper(Fuel_Type),",
+						"          Transmission = upper(Transmission)) ~> derivedUpperCases",
+						"carsalesdetails derive(VIN = upper(VIN),",
+						"          Buyer_Name = upper(Buyer_Name),",
+						"          Buyer_Gender = upper(Buyer_Gender),",
+						"          Buyer_City = upper(Buyer_City),",
+						"          Buyer_State = upper(Buyer_State),",
+						"          Loan_Taken = upper(Loan_Taken)) ~> derivedColumnUpper",
 						"derivedFullname alterRow(upsertIf(1==1)) ~> alterRow1",
-						"sortMarks alterRow(upsertIf(1==1)) ~> alterRow2",
+						"derivedUpper alterRow(upsertIf(1==1)) ~> alterRow2",
 						"derivedGrade alterRow(upsertIf(1==1)) ~> alterRow3",
-						"derivedVin alterRow(upsertIf(1==1)) ~> alterRow4",
-						"derivedVinCar alterRow(upsertIf(1==1)) ~> alterRow5",
+						"derivedUpperCases alterRow(upsertIf(1==1)) ~> alterRow4",
+						"select alterRow(upsertIf(1==1)) ~> alterRow5",
+						"sortMarks derive(Subject = upper(Subject)) ~> derivedUpper",
+						"derivedColumnUpper select(mapColumn(",
+						"          VIN,",
+						"          Name = Buyer_Name,",
+						"          Gender = Buyer_Gender,",
+						"          Age = Buyer_Age,",
+						"          City = Buyer_City,",
+						"          State = Buyer_State,",
+						"          Loan = Loan_Taken,",
+						"          Sell_Date,",
+						"          Updated_at",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select",
 						"alterRow1 sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     format: 'delta',",
@@ -1259,198 +1816,6 @@
 				"[concat(variables('factoryId'), '/datasets/ds_car_details')]",
 				"[concat(variables('factoryId'), '/datasets/ds_car_sales_details')]",
 				"[concat(variables('factoryId'), '/linkedServices/ls_datalake')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ds_student_names')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "ls_datalake",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": "Student_Names.csv",
-						"folderPath": "onprem",
-						"fileSystem": "bronze"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ls_datalake')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ds_student_marks')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "ls_datalake",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": "Student_Marks.csv",
-						"folderPath": "onprem",
-						"fileSystem": "bronze"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ls_datalake')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ds_student_grades')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "ls_datalake",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "Json",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": "Students_Grade_table.json",
-						"folderPath": "github",
-						"fileSystem": "bronze"
-					}
-				},
-				"schema": {}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ls_datalake')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ds_car_details')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "ls_datalake",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "Parquet",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": "Car_Details.parquet",
-						"folderPath": "sql",
-						"fileSystem": "bronze"
-					},
-					"compressionCodec": "snappy"
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ls_datalake')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ds_car_sales_details')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "ls_datalake",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "Parquet",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": "Car_Sales_Details.parquet",
-						"folderPath": "sql",
-						"fileSystem": "bronze"
-					},
-					"compressionCodec": "snappy"
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ls_datalake')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Silver_Transformations')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "SilverDataFlow",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "Silver_DataTransformation",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"studentnames": {},
-									"studentmarks": {},
-									"studentgrades": {},
-									"cardetails": {},
-									"carsalesdetails": {},
-									"sinkstudentnames": {},
-									"sinkstudentmarks": {},
-									"sinkgrades": {},
-									"sinkcardetails": {},
-									"sinkcarsalesdetails": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "None",
-							"cacheSinks": {
-								"firstRowOnly": true
-							}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/Silver_DataTransformation')]"
 			]
 		}
 	]
