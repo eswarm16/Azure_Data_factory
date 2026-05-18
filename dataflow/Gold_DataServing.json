@@ -47,6 +47,13 @@
 						"type": "LinkedServiceReference"
 					},
 					"name": "sink1"
+				},
+				{
+					"linkedService": {
+						"referenceName": "ls_datalake",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink2"
 				}
 			],
 			"transformations": [
@@ -76,6 +83,18 @@
 				},
 				{
 					"name": "alterRow1"
+				},
+				{
+					"name": "derivedSellDate"
+				},
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "sort1"
+				},
+				{
+					"name": "alterRow2"
 				}
 			],
 			"scriptLines": [
@@ -155,20 +174,10 @@
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> Innerjoin",
 				"Innerjoin select(mapColumn(",
-				"          VIN = CarDetails@VIN,",
 				"          Make,",
 				"          Model,",
-				"          Year,",
-				"          Body,",
-				"          Color,",
-				"          Fuel_Type,",
 				"          Transmission,",
-				"          Name,",
-				"          Gender,",
-				"          Age,",
-				"          City,",
 				"          State,",
-				"          Loan,",
 				"          Price,",
 				"          Sell_Date",
 				"     ),",
@@ -205,6 +214,22 @@
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
 				"select1 alterRow(upsertIf(1==1)) ~> alterRow1",
+				"select derive(Sell_Years = year(Sell_Date)) ~> derivedSellDate",
+				"derivedSellDate aggregate(groupBy(Make,",
+				"          Model,",
+				"          Transmission,",
+				"          State,",
+				"          Sell_Years),",
+				"     Quantity_Sold = count(1),",
+				"          Sales = sum(Price)) ~> aggregate1",
+				"aggregate1 sort(asc(Make, false),",
+				"     asc(Model, false),",
+				"     asc(Transmission, false),",
+				"     asc(State, false),",
+				"     desc(Sell_Years, false),",
+				"     desc(Quantity_Sold, false),",
+				"     desc(Sales, false)) ~> sort1",
+				"sort1 alterRow(upsertIf(1==1)) ~> alterRow2",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
@@ -223,7 +248,26 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> sink1"
+				"     skipDuplicateMapOutputs: true) ~> sink1",
+				"alterRow2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'gold',",
+				"     folderPath: 'car_sales',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['Make','Model','Transmission','State','Sell_Years'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink2"
 			]
 		}
 	}
