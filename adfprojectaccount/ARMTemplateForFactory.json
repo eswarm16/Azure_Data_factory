@@ -722,6 +722,37 @@
 							"waitOnCompletion": true,
 							"parameters": {}
 						}
+					},
+					{
+						"name": "Mail_Alert",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "Execute_SQL_Datalake_Pipeline",
+								"dependencyConditions": [
+									"Skipped",
+									"Failed",
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"method": "POST",
+							"headers": {},
+							"url": "https://prod-26.southcentralus.logic.azure.com:443/workflows/72f72e30e194447ab2a0f7739d176d8b/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=gPcTCxp_ouOc23mR0lWBNvio6dNOk4L8fjl1SJ3bpe0",
+							"body": {
+								"value": "{\n    \"pipeline_name\" : \"@{pipeline().Pipeline}\",\n    \"run_id\" : \"@{pipeline().RunId}\",\n    \"status\" : \"@{activity('Execute_SQL_Datalake_Pipeline').Status}\"\n}",
+								"type": "Expression"
+							}
+						}
 					}
 				],
 				"policy": {
