@@ -2,7 +2,11 @@
 
 A medallion-architecture data pipeline built with Azure Data Factory (ADF), ingesting data from multiple sources into a Data Lake and transforming it through Bronze → Silver → Gold layers.
 
+---
+
 ## Architecture Overview
+
+```
 
 ┌─────────────────────────────────────────────────────────┐
 │                     DATA SOURCES                        │
@@ -26,6 +30,9 @@ A medallion-architecture data pipeline built with Azure Data Factory (ADF), inge
 │              GOLD LAYER  (Analytics)                    │
 │         Car Sales Aggregates │ Student Grades           │
 └─────────────────────────────────────────────────────────┘
+```
+
+---
 
 ## Prerequisites
 
@@ -40,6 +47,7 @@ A medallion-architecture data pipeline built with Azure Data Factory (ADF), inge
 
 ## Repository Structure
 
+```
 ├── linkedServices/
 │   ├── ls_AzureSql          # Azure SQL Database linked service
 │   ├── ls_datalake          # Azure Data Lake Storage Gen2
@@ -73,38 +81,42 @@ A medallion-architecture data pipeline built with Azure Data Factory (ADF), inge
 └── dataflows/
     ├── Silver_DataTransformation  # Silver mapping data flow
     └── Gold_DataServing           # Gold mapping data flow
+```
 
+---
 ## Linked Services
 
-|-------------------|------------------------------|------------------------------------------------------------|
+
 | Name              | Type                         | Details                                                    |
 |-------------------|------------------------------|------------------------------------------------------------|
 | `ls_AzureSql`     | Azure SQL Database           | Server: `adfprojectservers.database.windows.net`, SQL Auth |
 | `ls_datalake`     | Azure Blob FS (ADLS Gen2)    | Account: `adfprojectaccount`                               |
 | `ls_github`       | HTTP Server                  | Base URL: `https://raw.githubusercontent.com/`, Anonymous  |
 | `ls_onprem_file`  | File Server                  | Host: `C:\source`, Self-Hosted IR: `local-self-host`       |
-|-------------------|------------------------------|------------------------------------------------------------|
 
-
+---
 
 ## Pipelines
 
-## onprem_ingestion
+### onprem_ingestion
 Reads CSV files from a local file server via a **Self-Hosted Integration Runtime** and copies them to the Bronze layer of the Data Lake.
 
 - Uses `GetMetadata` to list all child items dynamically
 - Iterates with `ForEach` and copies each file individually
 - Sink: Azure Data Lake Storage Gen2 (CSV format)
 
+---
 
-## API_Ingestion
+### API_Ingestion
 Pulls JSON data from a GitHub raw URL and lands it in the Bronze layer.
 
 - Source: HTTP linked service (Anonymous auth)
 - Mapped fields: `Marks`, `Grade`
 - Sink: Azure Data Lake Storage Gen2 (JSON format)
 
-## SQL_to_Datalake — Watermark-Based SQL Ingestion
+---
+
+### SQL_to_Datalake — Watermark-Based SQL Ingestion
 Incrementally copies tables from Azure SQL Database to the Bronze layer using a watermark column (`Updated_at`).
 
 `Lookup - GetSQLTables` — queries `INFORMATION_SCHEMA` for tables containing `Updated_at`
@@ -114,10 +126,14 @@ Incrementally copies tables from Azure SQL Database to the Bronze layer using a 
 - `CurrentTime` — captures current UTC timestamp
 - `Update_LastLoad` — writes updated watermark back to the lake
 
-## parent_pipeline — Orchestrator
+---
+
+### parent_pipeline — Orchestrator
 The top-level pipeline that chains all ingestion pipelines in sequence and sends an email alert on completion.
 
-## Email Alerting
+---
+
+### Email Alerting
 The `Mail_Alert` activity in `parent_pipeline` sends a POST request to an Azure Logic App with the following payload:
 
 ```json
@@ -130,49 +146,66 @@ The `Mail_Alert` activity in `parent_pipeline` sends a POST request to an Azure 
 
 Configure the Logic App to forward this to your email of choice.
 
+---
+
 **Execution Order:**
 1. `onprem_ingestion` 
 2. `API_Ingestion` 
 3. `SQL_to_Datalake` 
 4. `Mail_Alert` — POST to Azure Logic App with pipeline name, run ID, and status
 
-## Silver_Transformations — Silver Layer Pipeline
+---
+
+### Silver_Transformations — Silver Layer Pipeline
 Executes the `Silver_DataTransformation` mapping data flow.
 
-## Gold_Transformations — Gold Layer Pipeline
+---
+
+### Gold_Transformations — Gold Layer Pipeline
 Executes the `Gold_DataServing` mapping data flow.
+
+---
 
 ## Data Flows
 
 ## Silver_DataTransformation
 There are **5 independent streams** — one per source — each ending in an upsert sink.
 
-# Stream 1 — Student Names
+### Stream 1 — Student Names
 
+```
 [studentnames]  ──►  [derivedUpperCase]              ──►  [derivedFullname]  ──►            [alterRow1]    ──►  [sinkstudentnames]
  (Bronze CSV)         First_Name = upper(First_Name)      Full_Name =                       upsertIf(1==1)        silver/student_names
                       Last_Name  = upper(Last_Name)       concat(First_Name," ",Last_Name)                        Delta · key: Id 
+```
 
-# Stream 2 — Student Marks
+### Stream 2 — Student Marks
 
+```
 [studentmarks]  ──►  [sortMarks]          ──►  [derivedUpper]              ──►  [alterRow2]        ──►  [sinkstudentmarks]
 (Bronze CSV)         order by Marks DESC       Subject = upper(Subject)         upsertIf(1==1)          silver/student_marks
                                                                                                         Delta · key: Student_Id,
+```
 
-# Stream 3 — Grade Table
+### Stream 3 — Grade Table
 
+```
 [studentgrades]  ──►  [derivedGrade]                     ──►  [alterRow3]        ──►  [sinkgrades]
 (Bronze JSON)         Grade = replace(Grade,'F','FAIL')        upsertIf(1==1)          silver/grades_table
                                                                                        Delta · key: Marks
+```
 
-# Stream 4 — Car Details
+### Stream 4 — Car Details
 
+```
 [cardetails]     ──►  [castPrice]     ──►  [derivedUpperCases]      ──►  [alterRow4]     ──►  [sinkcardetails]
 (Bronze Parquet)      Price → integer      All columns = upper(…)        upsertIf(1==1)        silver/car_details
                                                                                                Delta · key: VIN
+```
 
-# Stream 5 — Car Sales Details
+### Stream 5 — Car Sales Details
 
+```
 [carsalesdetails]  ──►  [derivedColumnUpper]      ──►  [select]             ──►  [alterRow5]    ──►  [sinkcarsalesdetails]
 (Bronze Parquet)        All columns = upper(…)         Buyer_Name   → Name       upsertIf(1==1)      silver/car_sales_details
                                                        Buyer_Gender →                                Delta · key: VIN
@@ -180,22 +213,26 @@ There are **5 independent streams** — one per source — each ending in an ups
                                                        Buyer_State  → State
                                                        Loan_Taken   → Loan
                                                        drops: Dealer_Name
+```
 
 ## `Gold_DataServing`
 Produces two analytics-ready Gold Delta tables by joining and aggregating Silver data. Both streams run independently in parallel.
 
-# Stream 1 — Car Sales Analytics
+### Stream 1 — Car Sales Analytics
 
+```
 [CarDetails]-----──┐
                    ├──►[Innerjoin] ──►  [select] ──► [derivedSellDate] ──► [aggregate1] ──► [sort1] ──► [alterRow2]  ──►  [sink2]
 [CarSalesDetails]──┘                  
+```
 
-# Stream 2 — Student Grades       
+### Stream 2 — Student Grades       
 
+```
 [StudentNames]──┐
                 ├──►[Leftjoin] ─────────►[Crossjoin] ──►  [window1] ──►  [filter1] ──►  [select1] ──►  [alterRow1]  ──►  [sink1]
 [StudentMarks]──┘
                                            
                                            │
 [GradeTable] ─► [selectGradeTable] ------──┘
-
+```
